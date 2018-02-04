@@ -42,6 +42,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// It contains all killed enemies of a certain type
+	static TMap<TSubclassOf<ABaseEnemy>, int32> EnemiesKilled;
+
 private:
 	UPROPERTY()
 		TWeakObjectPtr<UAnimSequence> IdleAnimation;
@@ -59,7 +62,7 @@ protected:
 	virtual void RunBehaviour(float DeltaTime) PURE_VIRTUAL(ABaseEnemy::RunBehaviour, );
 
 	UPROPERTY()
-		TWeakObjectPtr<USkeletalMeshComponent> SkeletalMesh;
+	TWeakObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 
 	TSubclassOf<AActor> ProjectileClass;
 	TWeakObjectPtr<APawn> PlayerPawn;

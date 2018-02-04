@@ -39,7 +39,10 @@ void AAchievementManager::KillAllEnemiesWithoutMissingShots()
 	}
 }
 
-void AAchievementManager::KillNEnemiesOfAType(int NumberOfEnemies, TSubclassOf<ABaseEnemy> EnemyType)
+void AAchievementManager::KillNEnemiesOfAType(int NumberOfEnemies, FString EnemyType)
 {
-
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("YOU KILLED %d "), NumberOfEnemies) + EnemyType);
+	}
 }

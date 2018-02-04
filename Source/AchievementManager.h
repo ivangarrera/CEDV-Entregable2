@@ -25,7 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void KillAllEnemiesWithoutHarm();
 	void KillAllEnemiesWithoutMissingShots();
-	void KillNEnemiesOfAType(int NumberOfEnemies, TSubclassOf<ABaseEnemy> EnemyType);
+	void KillNEnemiesOfAType(int NumberOfEnemies, FString EnemyType);
 	
 	
 };

@@ -2,6 +2,7 @@
 #include "EngineUtils.h"
 #include "Engine.h"
 
+#include "BaseEnemy.h"
 #include "ShootingSlugEnemy.h"
 #include "JumpingShootingSlugEnemy.h"
 #include "SuperShootingSlugEnemy.h"
@@ -59,6 +60,15 @@ void AEnemyManager::BeginPlay()
 void AEnemyManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Iterate over the EnemiesKilled to check if the achievement of killing n enemies of a type is met.
+	for (auto& Elem : ABaseEnemy::EnemiesKilled)
+	{
+		if (Elem.Value >= 2)
+		{
+			AchievementManager->KillNEnemiesOfAType(Elem.Value, Elem.Key.Get()->GetName());
+		}
+	}
 
 	AccumulatedDeltaTime += DeltaTime;
 	if ((AccumulatedDeltaTime >= EnemySpawnTimeSeconds)
@@ -127,7 +137,6 @@ void AEnemyManager::SpawnEnemy()
 	TSubclassOf<ABaseEnemy> EnemyType = GetRandomEnemyClass();
 	FVector EnemySpawnLocation = GetRandomLocationFromReferencePlane();
 	GetWorld()->SpawnActor(EnemyType, &EnemySpawnLocation);
-	
 
 	if (GEngine)
 	{
