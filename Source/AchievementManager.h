@@ -23,9 +23,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void KillAllEnemiesWithoutHarm();
-	void KillAllEnemiesWithoutMissingShots();
-	void KillNEnemiesOfAType(int NumberOfEnemies, FString EnemyType);
-	
-	
+
+	// Functions called when an achievement is achieved
+	void KillAllEnemiesWithoutHarm(TWeakObjectPtr<class UTextBlock> TextBlock);
+	void KillAllEnemiesWithoutMissingShots(TWeakObjectPtr<class UTextBlock> TextBlock);
+	void KillNEnemiesOfAType(TWeakObjectPtr<class UTextBlock> TextBlock, int NumberOfEnemies, FString EnemyType);	
 };

@@ -24,7 +24,6 @@
 
 class ABaseEnemy;
 
-
 UCLASS()
 class CPPINHERITANCE_API AEnemyManager : public AActor
 {
@@ -68,4 +67,14 @@ private:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<class UUserWidget> AchievementsTextWidget;
+
+	TWeakObjectPtr<class UUserWidget> pAchievementsTextWidget;
+
+	TWeakObjectPtr<class UTextBlock> pAchievementsText;
+
+	TMap<TSubclassOf<ABaseEnemy>, int32> EnemiesKilled;
+
+	void EnemyDestroyed(AActor* Enemy);
 };

@@ -1,8 +1,10 @@
 #include "AchievementManager.h"
+#include "TextWidgetTypes.h"
+#include "TextBlock.h"
 #include "Engine.h"
 
 // Sets default values
-AAchievementManager::AAchievementManager()
+AAchievementManager::AAchievementManager() 
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -20,29 +22,19 @@ void AAchievementManager::BeginPlay()
 void AAchievementManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-void AAchievementManager::KillAllEnemiesWithoutHarm()
+void AAchievementManager::KillAllEnemiesWithoutHarm(TWeakObjectPtr<UTextBlock> TextBlock)
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("YOU KILLED ALL ENEMIES WHITHOUT HARM")));
-	}
+	TextBlock->SetText(FText::FromString(FString("You killed all enemies without suffer harm")));
 }
 
-void AAchievementManager::KillAllEnemiesWithoutMissingShots()
+void AAchievementManager::KillAllEnemiesWithoutMissingShots(TWeakObjectPtr<UTextBlock> TextBlock)
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("YOU KILLED ALL ENEMIES WITHOUT MISSING SHOTS")));
-	}
+	TextBlock->SetText(FText::FromString(FString("You killed all enemies without missing shots")));
 }
 
-void AAchievementManager::KillNEnemiesOfAType(int NumberOfEnemies, FString EnemyType)
+void AAchievementManager::KillNEnemiesOfAType(TWeakObjectPtr<UTextBlock> TextBlock, int NumberOfEnemies, FString EnemyType)
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("YOU KILLED %d "), NumberOfEnemies) + EnemyType);
-	}
+	TextBlock->SetText(FText::FromString(FString::Printf(TEXT("You killed %d "), NumberOfEnemies) + EnemyType));
 }

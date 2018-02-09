@@ -42,9 +42,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// It contains all killed enemies of a certain type
-	static TMap<TSubclassOf<ABaseEnemy>, int32> EnemiesKilled;
-
 private:
 	UPROPERTY()
 		TWeakObjectPtr<UAnimSequence> IdleAnimation;
@@ -66,6 +63,10 @@ protected:
 
 	TSubclassOf<AActor> ProjectileClass;
 	TWeakObjectPtr<APawn> PlayerPawn;
+
+	UPROPERTY()
+	TWeakObjectPtr<class AEnemyManager> EnemyManager;
+
 	float AccumulatedDeltaTime;
 
 	float const FireTimeInterval = 2.0f;

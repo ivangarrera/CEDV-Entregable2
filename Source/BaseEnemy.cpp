@@ -4,11 +4,10 @@
 // so you don't have to manually import header files individually ...
 #include "EngineMinimal.h"
 #include "Engine.h"
+#include "EnemyManager.h"
 
 // ... but PhysicsAsset library is not included by default, so we include it
 #include "PhysicsEngine/PhysicsAsset.h"
-
-TMap<TSubclassOf<ABaseEnemy>, int32> ABaseEnemy::EnemiesKilled;
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -62,6 +61,17 @@ void ABaseEnemy::BeginPlay()
 	
 	SkeletalMesh->PlayAnimation(IdleAnimation.Get(), true);
 	PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+
+	// Get a reference to Enemy Manager
+	FString EnemyManagerText = FString(TEXT("EnemyManager"));
+	for (TActorIterator<AActor> Iterator(GetWorld()); Iterator; ++Iterator)
+	{
+		if (Iterator->GetName().Contains(EnemyManagerText))
+		{
+			EnemyManager = Cast<AEnemyManager>(*Iterator);
+			break;
+		}
+	}
 }
 
 void ABaseEnemy::OnConstruction(const FTransform& transform)
@@ -85,21 +95,9 @@ void ABaseEnemy::Tick(float DeltaTime)
 
 void ABaseEnemy::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// Check if Map has the specific slug class.
-	// If map has the class, update the value of enemies killed.
-	// If map doesn't have the class, add the class and set enemies killed to 1. 
-	TWeakObjectPtr<UClass> SlugClass = SelfActor->GetClass();
-	if (EnemiesKilled.Find(SlugClass.Get()) != nullptr)
-	{
-		EnemiesKilled[SlugClass.Get()] += 1;
-	}
-	else
-	{
-		EnemiesKilled.Emplace(SlugClass.Get(), 1);
-	}
-
 	if (OtherActor) {
 		if (OtherActor->IsA(ProjectileClass)) {
+			EnemyManager->EnemyDestroyed(SelfActor);
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticleSystem.Get(), Hit.Location);
 			Destroy();
 		}

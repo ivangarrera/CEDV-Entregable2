@@ -1,6 +1,9 @@
 #include "EnemyManager.h"
 #include "EngineUtils.h"
 #include "Engine.h"
+#include "Blueprint/UserWidget.h"
+#include "TextWidgetTypes.h"
+#include "TextBlock.h"
 
 #include "BaseEnemy.h"
 #include "ShootingSlugEnemy.h"
@@ -9,7 +12,6 @@
 #include "LeftRightSlugEnemy.h"
 #include "RandomMovementSlugEnemy.h"
 #include "ChangeColorSlugEnemy.h"
-
 
 // Example of member initialization list
 AEnemyManager::AEnemyManager()
@@ -55,20 +57,22 @@ void AEnemyManager::BeginPlay()
 
 	// Get a reference to FirstPersonCharacter
 	Character = Cast<AFirstPersonCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter());
+
+	// Show widgets
+	if (AchievementsTextWidget)
+	{
+		pAchievementsTextWidget = CreateWidget<UUserWidget>(GetGameInstance(), AchievementsTextWidget);
+		if (pAchievementsTextWidget.IsValid())
+		{
+			pAchievementsTextWidget->AddToViewport();
+			pAchievementsText = (UTextBlock*)pAchievementsTextWidget->GetWidgetFromName("AchievementsText");
+		}
+	}
 }
 
 void AEnemyManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// Iterate over the EnemiesKilled to check if the achievement of killing n enemies of a type is met.
-	for (auto& Elem : ABaseEnemy::EnemiesKilled)
-	{
-		if (Elem.Value >= 2)
-		{
-			AchievementManager->KillNEnemiesOfAType(Elem.Value, Elem.Key.Get()->GetName());
-		}
-	}
 
 	AccumulatedDeltaTime += DeltaTime;
 	if ((AccumulatedDeltaTime >= EnemySpawnTimeSeconds)
@@ -81,23 +85,6 @@ void AEnemyManager::Tick(float DeltaTime)
 		SpawnEnemy();
 		EnemiesSpawned++;
 		AccumulatedDeltaTime = 0.0f;
-	}
-
-	// Look if Character have been shooted, when all enemies have been killed
-	if (Character.Get() 
-		&& EnemiesSpawned == TotalEnemies
-		&& GetNumberOfEnemies() == 0)
-	{
-		if (!Character->bIsHit)
-		{
-			AchievementManager->KillAllEnemiesWithoutHarm();
-		}
-
-		// Check if we havn't missed any shot
-		if (Character->NumberOfShots <= TotalEnemies)
-		{
-			AchievementManager->KillAllEnemiesWithoutMissingShots();
-		}
 	}
 }
 
@@ -132,14 +119,50 @@ TSubclassOf<ABaseEnemy> AEnemyManager::GetRandomEnemyClass() const
 }
 
 void AEnemyManager::SpawnEnemy()
-{
-	
+{	
 	TSubclassOf<ABaseEnemy> EnemyType = GetRandomEnemyClass();
 	FVector EnemySpawnLocation = GetRandomLocationFromReferencePlane();
 	GetWorld()->SpawnActor(EnemyType, &EnemySpawnLocation);
+}
 
-	if (GEngine)
+void AEnemyManager::EnemyDestroyed(AActor* Enemy)
+{
+	TWeakObjectPtr<UClass> SlugClass = Enemy->GetClass();
+	pAchievementsTextWidget->RemoveFromViewport();
+	GetWorld()->GetGameViewport()->RemoveAllViewportWidgets();
+
+	if (EnemiesKilled.Find(SlugClass.Get()) != nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Number of Enemies: %d"), GetNumberOfEnemies()));
+		EnemiesKilled[SlugClass.Get()] += 1;
+	} 
+	else
+	{
+		EnemiesKilled.Emplace(SlugClass.Get(), 1);
+	}
+
+	// Check if the achievement of killing n enemies of a type is met.
+	if (EnemiesKilled[SlugClass.Get()] >= 2)
+	{
+		pAchievementsTextWidget->AddToViewport();
+		AchievementManager->KillNEnemiesOfAType(pAchievementsText, EnemiesKilled[SlugClass.Get()], SlugClass.Get()->GetName());
+	}
+
+	// Look if Character have been shooted, when all enemies have been killed
+	if (Character.Get()
+		&& EnemiesSpawned == TotalEnemies
+		&& GetNumberOfEnemies() == 0)
+	{
+		if (!Character->bIsHit)
+		{
+			pAchievementsTextWidget->AddToViewport();
+			AchievementManager->KillAllEnemiesWithoutHarm(pAchievementsText);
+		}
+
+		// Check if we havn't missed any shot
+		if (Character->NumberOfShots <= TotalEnemies)
+		{
+			pAchievementsTextWidget->AddToViewport();
+			AchievementManager->KillAllEnemiesWithoutMissingShots(pAchievementsText);
+		}
 	}
 }
